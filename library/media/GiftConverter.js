@@ -2,6 +2,9 @@ import fs from 'fs'
 import path from 'path'
 import { spawn } from 'child_process'
 import ff from 'fluent-ffmpeg'
+import ffmpegStatic from 'ffmpeg-static'
+
+ff.setFfmpegPath(ffmpegStatic)
 
 function randomName(ext) {
     return Math.floor(Math.random() * 10000) + ext

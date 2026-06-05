@@ -1,7 +1,10 @@
 import ff from 'fluent-ffmpeg'
+import ffmpegStatic from 'ffmpeg-static'
 import webp from 'node-webpmux'
 import fs from 'fs'
 import path from 'path'
+
+ff.setFfmpegPath(ffmpegStatic)
 
 async function bufferToWebp(mediaBuffer, isVideo = false) {
     return new Promise((resolve, reject) => {
