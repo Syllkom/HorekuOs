@@ -15,29 +15,6 @@ export const mapButtons = (buttons = []) => {
             case 'location': name = 'send_location'; params = { display_text: btn.text, id: btn.id || 'location_req' }; break
             case 'vcard': name = 'vcard_message'; params = { display_text: btn.text, vcard: btn.vcard }; break
             case 'list': name = 'single_select'; params = { title: btn.text, sections: btn.sections }; break
-            
-            case 'webview': 
-                name = 'open_webview'
-                params = { title: btn.text, link: { in_app_webview: true, url: btn.url } }
-                break
-            case 'catalog': 
-                name = 'cta_catalog'
-                params = { business_phone_number: btn.phone || "51999999999" }
-                break
-            case 'mpm': 
-            case 'product': 
-                name = 'mpm'
-                params = { product_id: btn.productId }
-                break
-            case 'transaction': 
-                name = 'wa_payment_transaction_details'
-                params = { transaction_id: btn.transactionId }
-                break
-            case 'greeting_catalog': 
-                name = 'automated_greeting_message_view_catalog'
-                params = { business_phone_number: btn.phone, catalog_product_id: btn.productId }
-                break
-
             case 'galaxy':
             case 'flow':
                 name = 'galaxy_message'
@@ -52,8 +29,8 @@ export const mapButtons = (buttons = []) => {
                     flow_metadata: btn.metadata || { flow_json_version: 201, flow_name: "HorekuOs Flow", categories: [] }
                 }
                 break
-                
-            default: name = 'quick_reply'; params = { display_text: btn.text, id: btn.id || 'btn_default' }; break
+            default: name = 'quick_reply'
+            params = { display_text: btn.text, id: btn.id || 'btn_default' }; break
         }
 
         if (btn.icon) params.icon = btn.icon
@@ -61,89 +38,6 @@ export const mapButtons = (buttons = []) => {
 
         return { name, buttonParamsJson: JSON.stringify(params) }
     })
-}
-
-export const buildCarousel = async (sock, jid, data, options) => {
-    const cards = []
-
-    for (const card of data.cards) {
-        let headerObj = { title: card.title || "", subtitle: card.subtitle || "", hasMediaAttachment: false }
-
-        if (card.image) {
-            let imgBuffer = Buffer.isBuffer(card.image) ? card.image : await sock.getBuffer(card.image)
-            const content = await sock.generateWMContent({ image: imgBuffer })
-            headerObj.hasMediaAttachment = true
-            headerObj.imageMessage = content.imageMessage
-        } 
-        else if (card.product) {
-            let imgBuffer = Buffer.isBuffer(card.product.image) ? card.product.image : await sock.getBuffer(card.product.image)
-            const content = await sock.generateWMContent({ image: imgBuffer })
-            headerObj.hasMediaAttachment = true
-            headerObj.productMessage = {
-                product: {
-                    productImage: content.imageMessage,
-                    productId: card.product.id || "HK_" + Date.now(),
-                    title: card.product.title || "",
-                    description: card.product.description || "",
-                    currencyCode: card.product.currency || "USD",
-                    priceAmount1000: (card.product.price || 0) * 1000,
-                    retailerId: card.product.retailerId || "HorekuOs",
-                    productImageCount: 1
-                },
-                businessOwnerJid: card.product.businessJid || "0@s.whatsapp.net"
-            }
-        }
-
-        const cardButtons = mapButtons(card.buttons)
-
-        cards.push({
-            header: headerObj,
-            body: { text: card.body || "" },
-            footer: { text: card.footer || "" },
-            nativeFlowMessage: {
-                buttons: cardButtons,
-                messageVersion: 1
-            }
-        })
-    }
-
-    let ctxInfo = { mentionedJid: options.mentions || [], remoteJid: jid }
-    if (options.quoted) {
-        const q = options.quoted
-        ctxInfo.stanzaId = q.key.id
-        ctxInfo.participant = q.key.participant || q.key.remoteJid
-        ctxInfo.quotedMessage = q.message
-    }
-
-    const message = {
-        viewOnceMessage: {
-            message: {
-                messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-                interactiveMessage: {
-                    body: { text: data.body || "" },
-                    footer: { text: data.footer || "" },
-                    carouselMessage: {
-                        cards: cards,
-                        messageVersion: 1
-                    },
-                    contextInfo: ctxInfo
-                }
-            }
-        }
-    }
-
-    const nodes = [ {
-        tag: "biz",
-        attrs: {},
-        content:[ {
-            tag: "interactive",
-            attrs: { type: "native_flow", v: "1" },
-            content:[{ tag: "native_flow",
-                attrs: { name: "mixed" }
-            }]
-        } ]
-    } ]
-    return { message, nodes }
 }
 
 export const buildMediaMenu = async (sock, jid, data, options) => {

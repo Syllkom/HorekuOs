@@ -78,7 +78,7 @@ const printNeofetch = () => {
         chalk.gray('-----------------------------------'),
         formatLine('OS', `${osType} (${osArch})`),
         formatLine('Kernel', os.release()),
-        formatLine('Host', `HorekuOs Engine v${pkg.version}`),
+        formatLine('Host', `${pkg.name} Engine v${pkg.version}`),
         formatLine('Uptime', formatUptime(os.uptime())),
         formatLine('CPU', cpuModel),
         formatLine('RAM (Sys)', `${usedRam} / ${totalRam}`),
@@ -132,8 +132,9 @@ export default async () => {
 
     if (!isRegistered) {
         while (true) {
+        const pkg = JSON.parse(fs.readFileSync(path.resolve('./package.json'), 'utf-8'))
             let text = '\n\n\n'
-            text += chalk.redBright('╭╼◯') + chalk.white(' HorekuOs / ') + chalk.greenBright('Conexión') + '\n'
+            text += chalk.redBright('╭╼◯') + chalk.white(` ${pkg.name} / `) + chalk.greenBright('Conexión') + '\n'
             text += chalk.redBright('╷') + chalk.white(' Seleccione un método para vincular:\n')
             text += chalk.redBright('├╶╶╶✦\n')
             text += chalk.redBright('╵⌬ ') + chalk.greenBright('1. Código QR\n')

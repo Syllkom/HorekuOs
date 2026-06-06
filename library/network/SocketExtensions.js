@@ -1,5 +1,5 @@
 import got from 'got'
-import sharp from 'sharp'
+import { Jimp } from 'jimp'
 import axios from 'axios'
 import logger from '../utils/Logger.js'
 import { imageWebp, videoWebp } from '../media/MediaConverter.js'
@@ -43,24 +43,62 @@ export default async function (sock) {
             const gmessage = await generateWAMessageFromContent(jid, message, options)
             return sock.relayMessage(jid, gmessage.message, { messageId: generateID() })
         }
-
+        
         sock.resizePhoto = async (data = {}) => {
             try {
                 const image = data.image || ''
                 const scale = data.scale || 140
                 const resultFormat = data.result || 'buffer'
+                const fit = data.fit || 'cover'
                 let buffer = await sock.getBuffer(image)
                 if (!buffer.length) throw new Error('Formato de imagen inválido')
 
-                const pipe = sharp(buffer).resize(scale, scale, { fit: 'cover' }).jpeg({ quality: 60 })
-                if (resultFormat === 'base64') { const outputBuffer = await pipe.toBuffer(); return outputBuffer.toString('base64') } 
-                else { return await pipe.toBuffer() }
+                const img = await Jimp.read(buffer)
+
+                if (fit === 'contain') {
+                    img.scaleToFit({ w: scale, h: scale })
+                } else {
+                    img.cover({ w: scale, h: scale })
+                }
+
+                const outputBuffer = await img.getBuffer('image/jpeg')
+
+                if (resultFormat === 'base64') return outputBuffer.toString('base64')
+                else return outputBuffer
             } catch (e) {
-                console.error('Sharp Resize Error:', e.message)
+                console.error('Jimp Resize Error:', e.message)
                 return Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64')
             }
         }
         
+        const setProfilePic = async (jid, content) => {
+            const buffer = Buffer.isBuffer(content) ? content : (content.url ? await sock.getBuffer(content.url) : content)
+            
+            const isGroup = jid.endsWith('@g.us')
+            const attrs = {
+                to: '@s.whatsapp.net',
+                type: 'set',
+                xmlns: 'w:profile:picture'
+            }
+            
+            if (isGroup) {
+                attrs.target = jid
+            }
+
+            return await sock.query({
+                tag: 'iq',
+                attrs: attrs,
+                content: [{
+                    tag: 'picture',
+                    attrs: { type: 'image' },
+                    content: buffer
+                }]
+            })
+        }
+
+        sock.updateProfilePicture = setProfilePic
+        sock.groupUpdateProfilePicture = setProfilePic
+
         const originalRelayMessage = sock.relayMessage
 
         sock.relayMessage = async (jid, message, options = {}) => {

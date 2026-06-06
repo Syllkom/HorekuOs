@@ -7,7 +7,9 @@ global.font = {
     NunitoSans: { Bold: 'https://tinyurl.com/NunitoSans-Bold' },
     NotoSans: { Bold: 'https://tinyurl.com/NotoSans-Bold' },
     Anton: { Regular: 'https://tinyurl.com/Anton-Regular' },
-    MonoSpace: { Regular: 'https://tinyurl.com/SpaceMono' }
+    MonoSpace: { Regular: 'https://tinyurl.com/SpaceMono' },
+    Montserrat: { Italic: 'https://tinyurl.com/Montserrat-LightItalic' },
+    Raleway: { ExtraBold: 'https://tinyurl.com/Raleway-ExtraBold' }
 }
 
 global.readMore = String
@@ -16,25 +18,16 @@ global.readMore = String
 
 
 global.config = {
-    name: "HorekuOs",
+    name: "Aethero",
     prefixes: ".¿?¡!#%&/,~@",
     saveHistory: true,
     autoRead: false,
     silentConsole: true,
-    iconAI: true // para ver el icono de IA en chats privados
+    iconAI: false // para ver el icono de IA en chats privados
 }
-
-/*
-global.config.telegramProxy = {
-    enabled: false,
-    apiId: 1234567, // my.telegram.org
-    apiHash: "tu_hash_aqui",
-    sessionString: ""
-}
-*/
 
 global.config.userRoles = {
-    "36082607472889@lid": {
+    "178813094903960@lid": {
         root: true,
         owner: true,
         mod: true,

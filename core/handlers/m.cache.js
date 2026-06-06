@@ -12,11 +12,18 @@ const memoAsync = async (string, fun) => {
 
 export default ({ sock }) => {
     const cached = {}
+
+    const getPhotoWithTimeout = async (id, type) => {
+        return Promise.race([
+            sock.profilePictureUrl(id, type),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 3000))
+        ]).catch(() => 'https://files.catbox.moe/obz4b4.jpg')
+    }
+
     cached.group = {
         photo: async (id, type) => {
             return await memoAsync(`${id}-${type}-photo`, async () =>
-                await sock.profilePictureUrl(id, type).catch(_ =>
-                    'https://files.catbox.moe/obz4b4.jpg'))
+                await getPhotoWithTimeout(id, type))
         },
         metaData: async (id) => {
             if (!id) return {}
@@ -37,8 +44,7 @@ export default ({ sock }) => {
     cached.sender = {
         photo: async (id, type) => {
             return await memoAsync(`${id}-${type}-photo`, async () =>
-                await sock.profilePictureUrl(id, type).catch(_ =>
-                    'https://files.catbox.moe/obz4b4.jpg'))
+                await getPhotoWithTimeout(id, type))
         },
         desc: async (id) => {
             return await memoAsync(`${id}-desc`, async () =>
