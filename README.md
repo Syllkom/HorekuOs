@@ -51,5 +51,3 @@ npm start
 
 3. Vincular el bot seleccionando el método interactivo (Código QR o Código PIN de 8 dígitos) que se desplegará en la consola.
 ```
-
-¿Qué te parece pa? Quedó súper enfocado en la instancia final y mantiene tu documentación de la base limpia en la rama principal como debe ser.
