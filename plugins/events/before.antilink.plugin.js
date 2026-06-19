@@ -11,7 +11,7 @@ export default {
         const hasLink = LINK_REGEX.test(text)
 
         if (hasLink) {
-            const chat = await m.chat.db()
+                    const chat = await m.chat.db()
             const settings = chat.settings || {}
             
             if (!settings.antilink) return
